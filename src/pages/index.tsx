@@ -1,4 +1,4 @@
-import React, {useEffect, useState} from 'react';
+import React, {ChangeEvent, useEffect, useState} from 'react';
 import {
     Box,
     CircularProgress,
@@ -16,6 +16,16 @@ const Home: NextPage = () => {
     const [result, setResult] = useState<Array<number> | null>(null);
     const [calculating, setCalculating] = useState<boolean>(false);
     const [resultTime, setResultTime] = useState<string>();
+
+    const handleB = (e: ChangeEvent) => {
+
+        setTrB(Number((e.target as HTMLInputElement).value));
+
+    }
+
+    const handleC = (e: ChangeEvent) => {
+        setTrC(Number((e.target as HTMLInputElement).value));
+    }
 
     useEffect(() => {
         const findTrinomous = (b: number, c: number): Array<number> | null => {
@@ -49,12 +59,15 @@ const Home: NextPage = () => {
                  height="100vh" flexDirection={"column"}>
                 <Box>
                     <TextField
-                        onChange={(e) => setTrB(Number(e.target.value))}
+                        onChange={handleB}
                         value={trB}
+                        type={"number"}
+
                     />
                     <TextField
-                        onChange={(e) => setTrC(Number(e.target.value))}
+                        onChange={handleC}
                         value={trC}
+                        type={"number"}
                     />
                 </Box>
                 <Divider/>

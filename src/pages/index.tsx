@@ -31,7 +31,7 @@ export const getServerSideProps = async (context: NextPageContext) => {
 
     return {
         props: {
-            b: b ? parseInt(b.toString()) : 0,
+            b: b ? parseInt(b.toString()) : 1,
             c: c ? parseInt(c.toString()) : 0
         }
     }
@@ -116,92 +116,95 @@ const Home: NextPage<HomeProps> = ({b, c}: HomeProps) => {
 
 
     return (
-        <Container>
-            <FormGroup>
-                <Box display="flex" justifyContent="center" alignItems="center"
-                     height="100vh" flexDirection={"column"}>
-                    <Box className={classes.fields}>
-                        <TextField
-                            onChange={handleB}
-                            value={trB}
-                            type={"number"}
-                            fullWidth
-                            label={"B"} variant={"filled"}
+        <>
 
-                        />
 
-                        <Divider className={classes.divider}/>
+                    <Box display="flex" justifyContent="center"
+                         alignItems="center"
+                          flexDirection={"column"}>
+                        <Box className={classes.fields}>
+                            <TextField
+                                onChange={handleB}
+                                value={trB}
+                                type={"number"}
+                                fullWidth
+                                label={"B"} variant={"filled"}
 
-                        <TextField
-                            onChange={handleC}
-                            value={trC}
-                            type={"number"}
-                            fullWidth
-                            label={"C"}
-                            variant={"filled"}
-                        />
-                    </Box>
-                    <Divider/>
-                    <Box className={classes.res}>
-                        <Typography
-                            id="basic-list-demo"
-                            textTransform="uppercase"
-                            fontWeight="lg"
-                        >
-                            Results:
-                        </Typography>
-                        <List aria-labelledby="basic-list-demo">
+                            />
 
-                            {
-                                result !== null && result.length > 0 ? (
+                            <Divider className={classes.divider}/>
 
-                                    result.map((res, index) => (
-                                        <ListItem key={index} sx={{
-                                            display: "flex",
-                                            flexDirection: "column"
-                                        }}>
-                                            <Typography>
-                                                Variant {index + 1}:
-                                            </Typography>
-
-                                            <Typography sx={{display: "block"}}>
-                                                {res[0]} + {res[1]} = {trB}
-                                            </Typography>
-                                            <Typography sx={{display: "block"}}>
-                                                {res[0]} * {res[1]} = {trC}
-                                            </Typography>
-                                            <Divider/>
-                                        </ListItem>
-                                    ))) : (
-                                    <Typography>
-                                        No results found
-                                    </Typography>
-                                )
-                            }
-
-                        </List>
-                        <Typography>
-                            {result !== null && resultTime !== undefined ? resultTime : ''}
-                        </Typography>
-                        {calculating && (
-                            <Typography>
-                                Calculating...
-                                <CircularProgress/>
+                            <TextField
+                                onChange={handleC}
+                                value={trC}
+                                type={"number"}
+                                fullWidth
+                                label={"C"}
+                                variant={"filled"}
+                            />
+                        </Box>
+                        <Divider/>
+                        <Box className={classes.res}>
+                            <Typography
+                                id="basic-list-demo"
+                                textTransform="uppercase"
+                                fontWeight="lg"
+                            >
+                                Results:
                             </Typography>
-                        )}
+                            <List aria-labelledby="basic-list-demo">
+
+                                {
+                                    result !== null && result.length > 0 ? (
+
+                                        result.map((res, index) => (
+                                            <ListItem key={index} sx={{
+                                                display: "flex",
+                                                flexDirection: "column"
+                                            }}>
+                                                <Typography>
+                                                    Variant {index + 1}:
+                                                </Typography>
+
+                                                <Typography
+                                                    sx={{display: "block"}}>
+                                                    {res[0]} + {res[1]} = {trB}
+                                                </Typography>
+                                                <Typography
+                                                    sx={{display: "block"}}>
+                                                    {res[0]} * {res[1]} = {trC}
+                                                </Typography>
+                                                <Divider/>
+                                            </ListItem>
+                                        ))) : (
+                                        <Typography>
+                                            No results found
+                                        </Typography>
+                                    )
+                                }
+
+                            </List>
+                            <Typography>
+                                {result !== null && resultTime !== undefined ? resultTime : ''}
+                            </Typography>
+                            {calculating && (
+                                <Typography>
+                                    Calculating...
+                                    <CircularProgress/>
+                                </Typography>
+                            )}
+                        </Box>
+                        {/*  Button to copy url  */}
+
+                        <Button onClick={
+                            () => {
+                                navigator.clipboard.writeText(window.location.href).then(r => console.log(r));
+                            }
+                        } variant={"contained"} endIcon={<ContentCopyIcon/>}>Copy
+                            URL</Button>
                     </Box>
-                    {/*  Button to copy url  */}
 
-                    <Button onClick={
-                        () => {
-                            navigator.clipboard.writeText(window.location.href).then(r => console.log(r));
-                        }
-                    } variant={"contained"} endIcon={<ContentCopyIcon/>}>Copy
-                        URL</Button>
-                </Box>
-
-            </FormGroup>
-        </Container>
+        </>
     );
 };
 

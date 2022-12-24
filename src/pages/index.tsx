@@ -2,24 +2,87 @@ import type {ChangeEvent} from 'react';
 import React, {useEffect, useState} from 'react';
 import {
     Box,
+    Button,
     CircularProgress,
     Container,
     Divider,
     FormGroup,
-    List, ListItem,
+    List,
+    ListItem,
     TextField,
     Typography
 } from '@mui/material';
-import type {NextPage} from "next";
+import type {NextPage, NextPageContext} from "next";
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import classes from './index.module.scss';
 
-const Home: NextPage = () => {
-    const [trB, setTrB] = useState<number>(0);
-    const [trC, setTrC] = useState<number>(0);
+interface HomeProps {
+    b: number;
+    c: number;
+}
+
+// get server side props
+export const getServerSideProps = async (context: NextPageContext) => {
+
+    // get b and c from url query params
+
+    const b = context.query.b;
+    const c = context.query.c;
+
+    return {
+        props: {
+            b: b ? parseInt(b.toString()) : 0,
+            c: c ? parseInt(c.toString()) : 0
+        }
+    }
+
+
+}
+
+
+const Home: NextPage<HomeProps> = ({b, c}: HomeProps) => {
+    const [trB, setTrB] = useState<number>(b);
+    const [trC, setTrC] = useState<number>(c);
 
     const [result, setResult] = useState<Array<Array<number>> | null>(null);
     const [calculating, setCalculating] = useState<boolean>(false);
     const [resultTime, setResultTime] = useState<string>();
+
+    const findTrinomous: (b: number, c: number, results?: Array<Array<number>>) => (Array<Array<number>>) = (
+        b: number,
+        c: number,
+        results: Array<Array<number>> = [],
+    ) => {
+
+        if (b === 0 && c === 0) {
+            return results;
+        }
+
+        setCalculating(true);
+        const startTime = performance.now();
+
+        for (let i = -1000; i < 1000; i++) {
+            for (let j = -1000; j < 1000; j++) {
+                if (i + j === b && i * j === c && !results.some((result) => result[0] === i && result[1] === j)) {
+                    const endTime = performance.now();
+
+                    setResultTime(`Time taken: ${endTime - startTime}ms`);
+                    setCalculating(false);
+
+                    results.push([i, j]);
+
+                    return findTrinomous(b, c, results);
+                }
+            }
+        }
+
+        const endTime = performance.now();
+        setResultTime(`Time taken: ${endTime - startTime}ms`);
+        setCalculating(false);
+        return results;
+
+    }
+
 
     const handleB = (e: ChangeEvent) => {
 
@@ -31,72 +94,26 @@ const Home: NextPage = () => {
         setTrC(Number((e.target as HTMLInputElement).value));
     }
 
+
     useEffect(() => {
-        // const findTrinomous = (b: number, c: number): Array<number> | null => {
-        //     setCalculating(true);
-        //     const startTime = performance.now();
-        //
-        //     let results: Array<Array<number>> = [];
-        //
-        //     for (let i = -1000; i < 1000; i++) {
-        //         for (let j = -1000; j < 1000; j++) {
-        //             if (i + j === b && i * j === c) {
-        //                 const endTime = performance.now();
-        //
-        //                 setResultTime(`Time taken: ${endTime - startTime}ms`);
-        //                 setCalculating(false);
-        //
-        //                 results.push([i, j]);
-        //
-        //
-        //             }
-        //         }
-        //     }
-        //
-        //     const endTime = performance.now();
-        //     setResultTime(`Time taken: ${endTime - startTime}ms`);
-        //     setCalculating(false);
-        //     return null;
-        // }
+        console.log('use effect');
+        console.log(trB, trC);
+        const fT = findTrinomous(Number(trB), Number(trC));
 
-        const findTrinomous: (b: number, c: number, results?: Array<Array<number>>) => (Array<Array<number>>) = (
-            b: number,
-            c: number,
-            results: Array<Array<number>> = [],
-        ) => {
+        console.log(fT);
 
-            if (b === 0 && c === 0) {
-                return results;
-            }
 
-            setCalculating(true);
-            const startTime = performance.now();
+        setResult(fT);
+    }, []);
 
-            for (let i = -1000; i < 1000; i++) {
-                for (let j = -1000; j < 1000; j++) {
-                    if (i + j === b && i * j === c && !results.some((result) => result[0] === i && result[1] === j)) {
-                        const endTime = performance.now();
-
-                        setResultTime(`Time taken: ${endTime - startTime}ms`);
-                        setCalculating(false);
-
-                        results.push([i, j]);
-
-                        return findTrinomous(b, c, results);
-                    }
-                }
-            }
-
-            const endTime = performance.now();
-            setResultTime(`Time taken: ${endTime - startTime}ms`);
-            setCalculating(false);
-            return results;
-
-        }
-
+    useEffect(() => {
+        // change query params
+        window.history.replaceState({}, '', `/?b=${trB}&c=${trC}`);
         console.log('calculating: ', findTrinomous(trB, trC));
         setResult(findTrinomous(trB, trC));
+
     }, [trB, trC]);
+
 
     return (
         <Container>
@@ -109,6 +126,8 @@ const Home: NextPage = () => {
                             value={trB}
                             type={"number"}
                             fullWidth
+                            label={"B"} variant={"filled"}
+
                         />
 
                         <Divider className={classes.divider}/>
@@ -118,6 +137,8 @@ const Home: NextPage = () => {
                             value={trC}
                             type={"number"}
                             fullWidth
+                            label={"C"}
+                            variant={"filled"}
                         />
                     </Box>
                     <Divider/>
@@ -135,7 +156,10 @@ const Home: NextPage = () => {
                                 result !== null && result.length > 0 ? (
 
                                     result.map((res, index) => (
-                                        <ListItem key={index} sx={{display: "flex", flexDirection: "column"}}>
+                                        <ListItem key={index} sx={{
+                                            display: "flex",
+                                            flexDirection: "column"
+                                        }}>
                                             <Typography>
                                                 Variant {index + 1}:
                                             </Typography>
@@ -166,7 +190,16 @@ const Home: NextPage = () => {
                             </Typography>
                         )}
                     </Box>
+                    {/*  Button to copy url  */}
+
+                    <Button onClick={
+                        () => {
+                            navigator.clipboard.writeText(window.location.href).then(r => console.log(r));
+                        }
+                    } variant={"contained"} endIcon={<ContentCopyIcon/>}>Copy
+                        URL</Button>
                 </Box>
+
             </FormGroup>
         </Container>
     );
